@@ -145,23 +145,36 @@ namespace SeminarHub.Controllers
             return RedirectToAction(nameof(All));
         }
        
-        public async Task<IActionResult> Delete(int id)
-        {
-            var currentSeminar = await service.GetSeminarByIdAsync(id);
-            if (currentSeminar == null)
-            {
-                return BadRequest();
-            }
-            var currentUserId = GetUserId();
-            if (currentSeminar?.OrganizerId != currentUserId)
-            {
-                return Unauthorized();
-            }
+        [HttpGet]
+public async Task<IActionResult> Delete(int id)
+{
+    SeminarDeleteViewModel tempSeminar = await service.GetSeminarForDelete(id);
 
-            await service.DeleteSeminarAsync(id);
+    if(tempSeminar == null)
+    {
+        return BadRequest();
+    }
 
-            return RedirectToAction(nameof(All));
-        }
+    return View(tempSeminar);
+}
+
+public async Task<IActionResult> DeleteConfirmed(int id)
+{
+    var currentSeminar = await service.GetSeminarByIdAsync(id);
+    if (currentSeminar == null)
+    {
+        return BadRequest();
+    }
+    var currentUserId = GetUserId();
+    if (currentSeminar?.OrganizerId != currentUserId)
+    {
+        return Unauthorized();
+    }
+
+    await service.DeleteSeminarAsync(id);
+
+    return RedirectToAction(nameof(All));
+}
 
 
         private DateTime ParseAndValidateDate(string dateString, out bool isValid)
